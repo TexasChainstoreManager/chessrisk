@@ -40,8 +40,6 @@
 
     TODO: Audit of what needs to be saved (serialised), put underscores before the rest
 
-    TODO: store this in git? do a dev diary?
-    
     TODO: Consider using threads and deques rather than multiprocessing, as it may be faster.
 
     Following are done?
