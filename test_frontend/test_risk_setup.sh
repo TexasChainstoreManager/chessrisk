@@ -1,0 +1,1 @@
+source ./test_base.sh 'gameId=test1&gameStage=preSetup&nextGameStage=beginning_of_player_turn&formData={"humanPlayers":"2","computerPlayers":0,"playerInfo":[{"id":1,"name":"playerTheFirst","mark":"re"},{"id":2,"name":"playerTheSecond","mark":"bl"}]}&starting=true'

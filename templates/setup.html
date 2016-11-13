@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>Chessrisk!</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script>
+    $('document').ready(function() {
+
+      // Event handler to create N player boxes based on input of humanPlayers box
+      $('#humanPlayers').change(function() {
+        var $playerInputs = $('#playerInputs');
+        $playerInputs.html('');
+        for (var i = 1; i <= $('#humanPlayers').val(); i++) {
+          $playerInputs.append('\
+            <label for="player'+i+'Name">Player '+i+' Name:</label><input id="player'+i+'Name">\
+            <label for="player'+i+'Mark">Mark:</label>\
+            <select id="player'+i+'Mark">\
+              <option value="bl">bl</option>\
+              <option value="gr">gr</option>\
+              <option value="lb">lb</option>\
+              <option value="pi">pi</option>\
+              <option value="re">re</option>\
+              <option value="yl">yl</option>\
+            </select><br>\
+            '
+          );
+        }
+      });
+
+      // Event handler for Let's Go Button to send request with form data
+      $('#letsGoButton').click(function() {
+        var nhumans = $('#humanPlayers').val();
+        // Complex, page-specific data goes in formData for JSONizing
+        var formData = {
+          'humanPlayers': nhumans,
+          'computerPlayers': 0,
+          'playerInfo': []
+        };
+
+        // Add the N players into the formData
+        for (var i = 1; i <= nhumans; i++) {
+          formData.playerInfo.push({
+            id: i,
+            name: $('#player'+i+'Name').val(),
+            mark: $('#player'+i+'Mark').val()
+          });
+        }
+
+        // Simple data that we'll always have goes in props of postData
+        var postData = {
+          'gameId': $('#gameName').val(),
+          'gameStage': 'preSetup',
+          'nextGameStage': 'beginning_of_player_turn',
+          'starting': true,
+          'formData': JSON.stringify(formData)
+        };
+
+        $.post('/', postData, function(response) {
+            $('body').html(response);
+        });
+      }
+    );
+  });
+  </script>
+</head>
+<body>
+  <label for="gameName">Game name:</label><input id="gameName">
+  <br>
+  <label for="humanPlayers">Number of players:</label><input id="humanPlayers" type="number">
+  <br>
+  <div id="playerInputs"></div>
+  <br>
+  <button type="button" id="letsGoButton">Let's Go!</button>
+</body>
+</html>

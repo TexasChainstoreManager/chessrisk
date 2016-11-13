@@ -1,0 +1,20 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Chessrisk!</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script>
+      var globalVars = {{ GLOBAL_VARIABLES|tojson|safe }}
+    </script>
+</head>
+<body>
+    <div id="content">{% block content %}{% endblock %}</div>
+{% if GLOBAL_VARIABLES.GAME_STAGE in ['initial', 'beginning_of_player_turn', 'round_start', 'beginning_of_player_turn', 'start_of_build_turn', 'start_of_attack_turn', 'after_battle'] %}
+  {% include 'world.html' %}
+{% endif %}
+{% if GLOBAL_VARIABLES.GAME_STAGE in ['before_battle', 'during_battle'] %}
+  {% include 'chess.html' %}
+{% endif %}
+</body>
+</html>

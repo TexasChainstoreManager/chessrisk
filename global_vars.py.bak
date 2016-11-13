@@ -1,0 +1,13 @@
+ver_maj = 0
+ver_min = 1
+
+DEBUG = True
+
+PLAYERS = {}
+TERRITORIES = {}
+BOARD = None
+
+N_COMP_PLAYERS = 0
+N_HUMAN_PLAYERS = 0
+ROUND_NUMBER = 0
+CURR_PLAYER = 0

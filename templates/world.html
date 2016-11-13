@@ -1,0 +1,280 @@
+<style>
+  h1.mainTitle {
+    text-align: center
+  }
+
+  div.board {
+    text-align: center;
+  }
+
+  div.controls {
+  }
+
+  table#rbTable {
+    position: relative;
+    text-align: center;
+    border-collapse: collapse;
+  }
+
+  td.terrDiv{
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  td.terrDiv>span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+    margin-right: 10%;
+    margin-left: 10%;
+    overflow: hidden;
+  }
+
+  td.terrDiv>img {
+    display: block;
+  }
+
+  table.mainTable {
+    width: 100%;
+    /*border: 1px solid black;*/
+  }
+
+  td.leftCol {
+    width: 33%;
+  }
+
+  td.midCol {
+    width: 33%;
+  }
+
+  td.rightCol {
+    width: 33%;
+  }
+
+</style>
+
+
+<h1 class="mainTitle">The World</h1>
+<table class="mainTable">
+  <tr>
+    <td class="leftCol"></td>
+    <td class="midCol"><div id="riskBoard" class="board"></div></td>
+    <td class="rightCol"></td>
+  </tr>
+  <tr class="footer">
+    <td class="leftCol"></td>
+    <td class="midCol">
+      <div id="controls" class="controls">
+        <div id="controlsPlayerName">
+          <h2>Player: <span id="controlsPlayerNameText"></span></h2>
+        </div>
+        <div id="controlsMessage">
+
+        </div>
+      </div>
+    </td>
+    <td class="rightCol"></td>
+  </tr>
+</table>
+
+<!--<div class="rightCol"></div>-->
+<!--<div class="leftCol"></div>-->
+
+
+
+
+<script>
+
+//  /**
+//   * Plugin for JQuery allowing me to get width of text inside an element
+//   * Can be called as a member of any JQuery element.
+//   */
+//  $.fn.textWidth = function(){
+//    var html_org = $(this).html();
+//    var html_calc = '<span>' + html_org + '</span>';
+//    $(this).html(html_calc);
+//    var width = $(this).find('span:first').width();
+//    $(this).html(html_org);
+//    return width;
+//  };
+
+//  /**
+//   * Modify a string in a span in-place to fit within a container.
+//   */
+//  var fitString = function fitString($stringSpan, $container, margin) {
+//    var i = 0;
+//    while ($stringSpan.textWidth() > Math.max($container.width() - margin, 4)) {
+//      var len = $stringSpan.text().length;
+//      $stringSpan.text($stringSpan.text().substring(0, len-1));
+//      i++;
+//      if (i>100) {
+//        break;
+//      }
+//    }
+//  };
+
+  // Log the globalVars
+  console.log('globalVars:');
+  console.dir(globalVars);
+
+  // Some globals
+  $body = $('body');
+  $rb = $('#riskBoard');
+  $controls = $('#controls');
+  var armyAllowance;
+  var $hoverTerritory;
+
+  var $territories = [];
+  var $terrRows = [];
+
+  // Board setup. This is always done as we always want to see the board!
+  $rbTable = $('<table id=rbTable></table>').appendTo($rb);
+  for (var row = 0; row < globalVars.BOARD.nrows; row++) {
+    // Add a new row
+    $terrRows[row] = $('<tr class="territoryRow">').appendTo($rbTable);
+    $territories.push([]);
+    for (var col = 0; col < globalVars.BOARD.ncols; col++) {
+      // 'For each cell'
+
+      // Parse globalVars for this cell.
+      var owner = globalVars.BOARD.territory_array[row][col].owner;
+      var narmies = globalVars.BOARD.territory_array[row][col].narmies;
+      var name = globalVars.BOARD.territory_array[row][col].name;
+      var colour = globalVars.PLAYERS[owner].colour;
+
+      // Add a new cell to the current row. $container is the table cell.
+      $territories[row].push($('<td class="terrDiv"></td>').appendTo($terrRows[row]));
+      var $container = $territories[row][col];
+
+      $container.image = $('<img class="terrImg" src="/static/img/sq'+colour+'.png"/>').appendTo($territories[row][col]);
+      var $image = $container.image;
+
+      $container.name = $('<span class="terrName">' + name + '</span>').appendTo($territories[row][col]);
+      var $name = $container.name;
+
+      $container.narmies = $('<span class="terrNarmies">' + narmies + '</span>').appendTo($territories[row][col]);
+      var $narmies = $container.narmies;
+
+      $container.owner = $('<span class="terrOwner">' + owner + '</span>').appendTo($territories[row][col]);
+      var $owner = $container.owner;
+
+//      debugger;
+      // Truncate the name, number of armies, and owner strings.
+      // The operation is performed on a live DOM.
+//      fitString($name, $container, 10);
+//      fitString($narmies, $container, 10);
+//      fitString($owner, $container, 10);
+
+      // Calculate Y-position of image relative to info text (using name as reference).
+      var nameH = $name.height();
+      var imgH = $image.height();
+      var posY = (imgH - nameH)/2;
+
+      // Relocate info text to centre of image.
+      $name.css('top', posY-(nameH+2));
+      $narmies.css('top', posY);
+      $owner.css('top', posY+(nameH+2));
+
+      // Store names of highlight and normal images in DOM and register hover event handler.
+      // TODO: store these hidden on the page and copy them from the DOM? Can you do that?
+      $container.attr("highlightImage", "/static/img/sq"+colour+"h.png");
+      $container.attr("normalImage", "/static/img/sq"+colour+".png");
+    }
+  }
+
+  $('#controlsPlayerNameText').text(globalVars.CURR_PLAYER);
+
+  var buildOrAttack = function buildOrAttack() {
+    $('#controlsMessage').html('<button id="buildButton" type="button">Build</button> or <button id="attackButton" type="button">Attack</button>?');
+
+    $('#buildButton').click(function() {
+      // Run build function
+      updateArmyAllowance().then(engageBuildMode);
+    });
+
+    $('#attackButton').click(function() {});
+  };
+
+  var updateArmyAllowance = function updateArmyAllowance() {
+    var postData = {
+      'gameId': globalVars.GAME_ID,
+      'globalVars': JSON.stringify(globalVars),
+      'module': 'risk',
+      'func': 'count_army_allowance',
+      'args': [],
+      'kwargs': {}
+    };
+    return $.post('/serverfunc', postData, function(response) {
+      armyAllowance = response;
+    });
+  };
+
+  var forAllTerritories = function forAllTerritories(callback) {
+    for (var row = 0; row < globalVars.BOARD.nrows; row++) {
+      for (var col = 0; col < globalVars.BOARD.ncols; col++) {
+        callback(row, col);
+      }
+    }
+  };
+
+  var enableTerritoryHover = function enableTerritoryHover(row, col) {
+    $territories[row][col].hover(
+      function() {$hoverTerritory = $(this); $(this).children('img').attr("src", $(this).attr("highlightImage"))},
+      function() {$(this).children('img').attr("src", $(this).attr("normalImage"))}
+    );
+  };
+
+  var disableTerritoryHover = function disableTerritoryHover(row, col) {
+    $territories[row][col].off('hover');
+  };
+
+  var enableTerritoryArmyPlacement = function enableTerritoryArmyPlacement(row, col) {
+    $territories[row][col].click(territoryArmyClick(row, col));
+  };
+
+  var territoryArmyClick = function territoryArmyClick(row, col) {
+    // Send an ajax request with some answers.
+    return function() {
+      var formData = {
+        territory: $territories[row][col].name.text(),
+        narmies: $('#xArmies').val()
+      };
+      var postData = {
+        'gameId': globalVars.GAME_ID,
+        'gameStage': 'buildStart',
+        'nextGameStage': 'during_build_turn',
+        'formData': JSON.stringify(formData)
+      };
+      console.log('postData');
+      console.dir(postData);
+      $.post('/', postData, function (response) {
+        console.log(response);
+      });
+    };
+  };
+
+  var engageBuildMode = function engageBuildMode() {
+    $('#controlsMessage').html(
+      '<span id="remainingArmies">Remaining armies: <span id="armyAllowance">' + armyAllowance + '</span></span></br></br>\
+       <span id="placeXArmies">Place <input id="xArmies" type="number"></span></br></br>'
+    );
+
+    forAllTerritories(enableTerritoryHover);
+
+    $('#xArmies').change(changeXArmies);
+
+    forAllTerritories(enableTerritoryArmyPlacement);
+
+    forAllTerritories(disableTerritoryHover);
+  };
+
+  var changeXArmies = function changeXArmies() {
+    $('#armyAllowance').text(armyAllowance - $('#xArmies').val());
+  };
+
+  buildOrAttack();
+
+</script>
