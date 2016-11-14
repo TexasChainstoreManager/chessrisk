@@ -33,7 +33,7 @@ import utils
 
 
 # class Mocker(object):
-#
+#     """ I wrote this when I thought I didn't have access to the mock module"""
 #     def __init__(self):
 #         self.patched = {}
 #
@@ -55,10 +55,15 @@ class FakeInputException(Exception):
 
 
 class FakeInput(object):
+    """Fake the user interaction. Instantiate with mappings between question and answer.
+    Replace the user input function with cls.fake_input to """
 
     def __init__(self, inputs):
         """
-        @param inputs - list of inputs in the order they are expected
+        @param inputs - dict of inputs, mapping prompt message to input
+                        {what_am_i_being_asked: what_is_my_response}
+                        what_is_my_response can be a list of responses, called in order.
+                        If the list is exhausted, the final entry is used repeatedly.
         """
         self.inputs = inputs
 
@@ -73,34 +78,51 @@ class FakeInput(object):
 
         # If a list was given, pop from the list
         if isinstance(user_input, list):
-            user_input = user_input.pop()
+            if len(user_input) > 1 :
+                user_input = user_input.pop()
+            else:
+                user_input = user_input[0]
 
         if user_input in ['exit', 'x']:
             raise utils.UserQuitException
         if user_input in ['s', 'save']:
+            # We'll need to test the save function separately?
             pass
         if user_input in ['l', 'load']:
             raise utils.LoadException
 
+        return user_input
 
-class TestIntegration(unittest.TestCase):
 
+class TestIntegrationCmdLine(unittest.TestCase):
+    """Test the commandline game.
+    Mock out the user input and stdout, and some other things like saving and loading.
+    """
     @classmethod
     def setUpClass(cls):
         inputs = {
 
         }
+        # We might need to mock handle_user_input and prnt everywhere they're imported! :(
         mock.patch.object(
             chessrisk.utils.UserInputter,
             'handle_user_input',
             FakeInput(inputs)
         ).start()
 
+        mock.patch.object(chessrisk.utils, 'prnt').start()
+
     @classmethod
     def tearDownClass(cls):
         mock.patch.stopall()
 
-    def test_normal_game(self):
+    def test_setup_and_quit(self):
+        """Can set a game up, then quit"""
+
+        # Set up a bunch of inputs for the setup stage
+        chessrisk.utils.UserInputter.handle_user_input.inputs = {}
+
+        # Run the game in cmdline mode. worker=False by default.
         chessrisk.run_game(None, None)
 
 
