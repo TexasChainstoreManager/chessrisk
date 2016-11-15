@@ -1,57 +1,6 @@
 '''
-    TODO: Need to re-structure a bit:
-         1. Write some unit tests that test any interfaces there actually are! This may involve
-            writing something to fake the user input (not really unit tests but hey, they'll still
-            be fast. Maybe call them integration tests).
-         2. Make it more front-endable by decoupling the question-answer from the updating of game state.
-            Have a game state object that gets passed around, we can send this to the front end. Basically
-            why isn't gv a 'normal' object, why have I done it in this crazy 'module' way. Then front end
-            can send a request to an 'update' route that updates the game state. In fact, game flow SHOULD
-            be duplicated by front-end, because it will be a bit different in front end due to non-linear
-            user interaction of a web page. So we don't need to have this 'server process, game process'
-            situation, we can just route the functions to calculate stuff. Back-end can be stateless because
-            we can pass the game object back and forth - state is kept in the browser.
-
-
-    TODO: get user input for nrows, ncols (or range of)
-    TODO: make it possible to have gaps in the board (water)
-    TODO: make it possible to user-define the board
-    TODO: 'just play chess' mode if you just want to play chess.
-        allow custom or classic setup.
-    TODO: split out global_const from global_vars in order to save 'save' space
-    TODO: first command entry always fails after save (DONE?)
-    TODO: choice check against file existence for load.
-    TODO: the players.py module is really 'special'... needs rationalising.
-
-    TODO: different player cols for browser vs cmdline
-
-    TODO: restore in client-server mode
-    TODO: timeout in client-server mode
-
-    TODO: AI API. Accesses functions directly for helpfulness.
-    Accesses 'answer mode' to progress game. Sends encrypted password in request (md5 hash).
-    Server will need to handle bad answers - respond with error message
-    informing of where we're at.
-
-    TODO: When you restore, object identities get screwed up such that,
-          e.g., territory.owner is not player.name doesn't work
-          but territory.ownder != player.name does.
-    TODO: restore to beginning of player turn screws up player turn order in first turn (?)
-
-    TODO: Audit of what needs to be saved (serialised), put underscores before the rest
-
-    TODO: Consider using threads and deques rather than multiprocessing, as it may be faster.
-
-    Following are done?
-    TODO: Not currently able to save after chess setup, cannot save board etc.
-    TODO: Debug all restore checkpoints
-      - initial DONE
-      - round start DONE
-      - beg of player turn
-      - start of build turn
-      - start of attack turn
-      - before battle
-      - during battle
+Chessrisk
+If you thought Risk was too short...
 '''
 import sys
 import os
@@ -86,7 +35,7 @@ def print_welcome_message():
         "---------------------------------------------------------------",
         "Welcome to Chessrisk v{0}.{1}".format(gv.ver_maj, gv.ver_min),
         "This version is a full square grid of territories with no sea.",
-        "Battles can only be resolved in traditional Risk style.",
+        "Battles can be resolved in Chess Style or traditional Risk style.",
         "Input is case insensitive and you can use short and long commands.",
         "Type e(x)it at any time to exit.",
         "Type (s)ave at any time to save.",
