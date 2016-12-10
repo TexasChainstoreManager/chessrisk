@@ -1,7 +1,4 @@
-import sys
-
 import global_vars as gv
-from utils import prnt
 
 
 class PlayersDict(dict):

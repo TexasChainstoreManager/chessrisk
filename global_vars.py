@@ -94,9 +94,9 @@ N_ATTACK_ARMIES = None
 # Also must infer NRANKS, NFILES.
 CHESSBOARD = None
 
-from utils import UserInputter
-
+from utils import UserInputter, Printer
 UI = UserInputter()
+prnt = Printer()
 
 _CLASSIC_CHESSMEN_VALUES = {
                    'p': 1,

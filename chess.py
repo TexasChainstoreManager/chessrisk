@@ -1,4 +1,3 @@
-import sys
 import math
 import random
 import re
@@ -7,8 +6,6 @@ from copy import deepcopy
 
 import global_vars as gv
 import save
-
-from utils import prnt, clear_output
 
 NRANKS = 8
 NFILES = 0
@@ -38,7 +35,7 @@ def play_chess(n_attack_armies, n_defend_armies, attacker, defender):
 def risk_style(n_attack_armies, n_defend_armies, attacker, defender):
     continue_fight = True
     while continue_fight:
-        clear_output()
+        gv.prnt.clear_output()
 
         attack_dice = []
         defend_dice = []
@@ -63,8 +60,8 @@ def risk_style(n_attack_armies, n_defend_armies, attacker, defender):
             else:
                 n_attack_armies = max(n_attack_armies-1, 0)
 
-        prnt("{0}: {1}".format(attacker, str(n_attack_armies)))
-        prnt("{0}: {1}".format(defender, str(n_defend_armies)))
+        gv.prnt("{0}: {1}".format(attacker, str(n_attack_armies)))
+        gv.prnt("{0}: {1}".format(defender, str(n_defend_armies)))
         if n_attack_armies == 0 or n_defend_armies == 0:
             continue_fight = False
 
@@ -144,7 +141,7 @@ def chess_style(n_attack_armies, n_defend_armies, attacker, defender):
 
 def stalemate(att_pieces, def_pieces):
     if att_pieces == ['g'] and def_pieces == ['G']:
-        prnt('STALEMATE!')
+        gv.prnt('STALEMATE!')
         return True
     return False
 
@@ -160,8 +157,8 @@ def choose_board_layout(player):
     """
     global NRANKS, NFILES
     
-    prnt('{0}, choose the board layout.'.format(player), clear=True)
-    prnt('You must have 8 ranks.')
+    gv.prnt('{0}, choose the board layout.'.format(player), clear=True)
+    gv.prnt('You must have 8 ranks.')
     gv.UI.clear_inv_choices()
     gv.UI.set_inv_choice({
         "Please enter a number":
@@ -195,7 +192,7 @@ def print_board(part, clear=False):
     files are side-side
     """
     if clear:
-        clear_output()
+        gv.prnt.clear_output()
     if part == 'all':
         prt = (0,7)
     elif part == 'top':
@@ -222,31 +219,31 @@ def print_board(part, clear=False):
             creamy_filling['top'] += '|{0} {0}'.format(colour)
             creamy_filling['mid'] += '| {1} '.format(colour, square)
             creamy_filling['bot'] += '|{0} {0}'.format(colour)
-        prnt(' ' + '+---'*(NFILES) + '+')
-        prnt(' ' + creamy_filling['top'] + '|')
-        prnt(str(irank) + creamy_filling['mid'] + '|')
-        prnt(' ' + creamy_filling['bot'] + '|')
-    prnt(' ' + '+---'*(NFILES) + '+')
+        gv.prnt(' ' + '+---'*(NFILES) + '+')
+        gv.prnt(' ' + creamy_filling['top'] + '|')
+        gv.prnt(str(irank) + creamy_filling['mid'] + '|')
+        gv.prnt(' ' + creamy_filling['bot'] + '|')
+    gv.prnt(' ' + '+---'*(NFILES) + '+')
                     
     files_string = ''
     for ifile_ in xrange(NFILES):
         file_name = chr(97 + ifile_).upper()
         files_string += '  {0} '.format(file_name)
-    prnt(' {0} '.format(files_string))
+    gv.prnt(' {0} '.format(files_string))
 
         
 def choose_pieces(player, n_armies):
-    prnt('{0}, choose your pieces!'.format(player))
-    prnt('Values of pieces: ')
-    prnt('---------------------')
-    prnt('Pawn: {0}'.format(gv.CHESSMEN_VALUES['p']))
-    prnt('Knight: {0}'.format(gv.CHESSMEN_VALUES['k']))
-    prnt('Bishop: {0}'.format(gv.CHESSMEN_VALUES['b']))
-    prnt('Rook: {0}'.format(gv.CHESSMEN_VALUES['r']))
-    prnt('Queen: {0}'.format(gv.CHESSMEN_VALUES['q']))
-    prnt('---------------------')
-    prnt('You always start with one kin(g).')
-    prnt('Choose from (p)awn, (k)night, (b)ishop, (r)ook, (q)ueen:')
+    gv.prnt('{0}, choose your pieces!'.format(player))
+    gv.prnt('Values of pieces: ')
+    gv.prnt('---------------------')
+    gv.prnt('Pawn: {0}'.format(gv.CHESSMEN_VALUES['p']))
+    gv.prnt('Knight: {0}'.format(gv.CHESSMEN_VALUES['k']))
+    gv.prnt('Bishop: {0}'.format(gv.CHESSMEN_VALUES['b']))
+    gv.prnt('Rook: {0}'.format(gv.CHESSMEN_VALUES['r']))
+    gv.prnt('Queen: {0}'.format(gv.CHESSMEN_VALUES['q']))
+    gv.prnt('---------------------')
+    gv.prnt('You always start with one kin(g).')
+    gv.prnt('Choose from (p)awn, (k)night, (b)ishop, (r)ook, (q)ueen:')
 
     gv.UI.clear_inv_choices()
     gv.UI.set_inv_choice({
@@ -260,7 +257,7 @@ def choose_pieces(player, n_armies):
     while n_armies > 0:
         pieces.append(gv.UI.user_input_check_choices('{0} armies left.'.format(n_armies)))
         n_armies -= gv.CHESSMEN_VALUES[pieces[-1]]
-        prnt("Your forces: {0}".format(pieces))
+        gv.prnt("Your forces: {0}".format(pieces))
 
     return pieces
 
@@ -269,7 +266,7 @@ def choose_placement(player_type, player, pieces):
     unplaced_pieces = deepcopy(pieces)
 
     if player_type== 'attacker':
-        prnt('As the attacker, you start in the top half of the board:')
+        gv.prnt('As the attacker, you start in the top half of the board:')
         board_part = 'top'
         valid_ranks = '[0-3]'
     elif player_type == 'defender':
@@ -279,7 +276,7 @@ def choose_placement(player_type, player, pieces):
         raise Exception('Invalid player_type.')
 
     while unplaced_pieces:
-        prnt('As the {}, you start in the {} half of the board:'.format(player_type, board_part), clear=True)
+        gv.prnt('As the {}, you start in the {} half of the board:'.format(player_type, board_part), clear=True)
         print_board(board_part)
 
         gv.UI.clear_inv_choices()
@@ -312,9 +309,9 @@ def choose_placement(player_type, player, pieces):
         gv.CHESSBOARD[file_][rank] = piece_symbol
         unplaced_pieces.remove(piece)
 
-    prnt(('---------------YOUR FINAL LAYOUT---------------'))
+    gv.prnt(('---------------YOUR FINAL LAYOUT---------------'))
     print_board(board_part)
-    prnt(('-----------------------------------------------'))
+    gv.prnt(('-----------------------------------------------'))
 
 
 def process_move(player_type, player, opponents_pieces):
@@ -322,7 +319,7 @@ def process_move(player_type, player, opponents_pieces):
     print_board('all', clear=True)
 
     if gv.CHECK[player_type]:
-        prnt('~~~ CHECK! ~~~')
+        gv.prnt('~~~ CHECK! ~~~')
 
     # If it's the attacker's turn, 
     # give them the option to withdraw.
@@ -379,7 +376,7 @@ def process_move(player_type, player, opponents_pieces):
         valid_moves = valid_moves_one_piece(player_type, file_, rank, piece)
 
         if not valid_moves:
-            prnt("No valid moves for that piece, try again!")
+            gv.prnt("No valid moves for that piece, try again!")
 
     # Get the player's choice of move
     gv.UI.clear_inv_choices()
@@ -399,7 +396,7 @@ def process_move(player_type, player, opponents_pieces):
     gv.CHESSBOARD[file_to][rank_to] = piece
     gv.CHESSBOARD[file_][rank] = ' '
     if check_or_mate(player_type):
-        prnt('CHECKMATE!')
+        gv.prnt('CHECKMATE!')
         return 'checkmate'
 
     if piece.lower() == 'p':

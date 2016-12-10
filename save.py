@@ -1,12 +1,10 @@
 import os
-import sys
 import json
 import shutil
 
 from pprint import pprint
 
 import global_vars as gv
-from utils import prnt
 
 
 def serialise():
@@ -82,7 +80,7 @@ def manualsave(filename):
     is just renaming the autosave such that it is kept.
     """
     shutil.copy2(os.path.join('saves', 'autosave'), os.path.join('saves', filename))
-    prnt('Game saved as %s.' % filename)
+    gv.prnt('Game saved as %s.' % filename)
 
 
 def restore_saved_globals_into_module(modules_gv, saved_globals):
@@ -120,7 +118,7 @@ def restore_saved_globals():
 
     gv.BOARD.print_board()
     if gv.ATTACK_FROM and gv.ATTACK_TO:
-        prnt("{} is attacking from {} to {} with {} armies".format(gv.CURR_PLAYER, gv.ATTACK_FROM, gv.ATTACK_TO, gv.N_ATTACK_ARMIES))
+        gv.prnt("{} is attacking from {} to {} with {} armies".format(gv.CURR_PLAYER, gv.ATTACK_FROM, gv.ATTACK_TO, gv.N_ATTACK_ARMIES))
 
 
 def handle_save_request():

@@ -18,40 +18,53 @@ class SendHttpResponse(Exception):
     pass
 
 
-def blockprnt(list):
-    clear_output()
-    for line in list:
-        prnt(line, clear=False)
-
-
-def prnt(*args, **kwargs):
-    # Wrap print so we can override it.
-    if 'clear' in kwargs.keys():
-        if kwargs['clear'] is not False:
-            clear_output()
-    msg = args[0]
-    if gv.RESTORING or gv.HEADLESS:
-        if gv.DEBUG:
-            print msg
+class Printer(object):
+    """Putting the print functions in a callable object makes mocking easier.
+    Also serves as a namespace.
+    """
+    def __init__(self):
         pass
-    else:
-        try:
-            gv.PRINT_COUNT = len(msg)
-            gv.PRINT_RECORD += '\n' + msg
-            print msg
-            sys.stdout.flush()
-        except TypeError as e:
-            if 'has no len' in e.message:
-                pass
-            else:
-                raise e
 
+    def save(self):
+        return '"Nothing to save"'
 
-def clear_output():
-    if os.name == 'nt':
-        os.system('cls')
-    else:
-        os.system('clear')
+    def load(self, data):
+        return '"Nothing to load"'
+
+    def __call__(self, *args, **kwargs):
+        """Wrap print so we can override it.
+        """
+        if 'clear' in kwargs.keys():
+            if kwargs['clear'] is not False:
+                self.clear_output()
+        msg = args[0]
+        if gv.RESTORING or gv.HEADLESS:
+            if gv.DEBUG:
+                print msg
+            pass
+        else:
+            try:
+                gv.PRINT_COUNT = len(msg)
+                gv.PRINT_RECORD += '\n' + msg
+                print msg
+                sys.stdout.flush()
+            except TypeError as e:
+                if 'has no len' in e.message:
+                    pass
+                else:
+                    raise e
+
+    @staticmethod
+    def clear_output():
+        if os.name == 'nt':
+            os.system('cls')
+        else:
+            os.system('clear')
+
+    def blockprnt(self, list):
+        self.clear_output()
+        for line in list:
+            self.__call__(line, clear=False)
 
 
 from save import handle_save_request
@@ -77,7 +90,7 @@ class UserInputter():
         if gv.RESTORING:
             user_input = fake_user_input_during_restore(message)
         elif gv.HEADLESS:
-            prnt(message, clear=clear)
+            gv.prnt(message, clear=clear)
             user_input = fake_user_input_from_http(message)
         else:
             valid_choice = False
@@ -89,9 +102,9 @@ class UserInputter():
                     continue
                 for warning, condition in self.inv_choices.items():
                     if gv.DEBUG:
-                        prnt(warning, '*******', clear=False)
+                        gv.prnt(warning, '*******', clear=False)
                     if condition(user_input):
-                        prnt(warning, clear=False)
+                        gv.prnt(warning, clear=False)
                         valid_choice = False
                         break
         return user_input
@@ -99,17 +112,17 @@ class UserInputter():
     def handle_user_input(self, message, cast_lower=True, clear=False):
         if gv.RESTORING:
             if gv.DEBUG:
-                prnt(message)
+                gv.prnt(message)
             user_input = fake_user_input_during_restore(message)
         elif gv.HEADLESS:
-            prnt(message, clear=clear)
+            gv.prnt(message, clear=clear)
             user_input = fake_user_input_from_http(message)
         else:
             if message != '':
-                prnt(message, clear=clear)
+                gv.prnt(message, clear=clear)
             user_input = None
             while user_input in [None]:
-                prnt('>>')
+                gv.prnt('>>')
                 if gv.HEADLESS:
                     input_func = sys.stdin.readline
                 else:

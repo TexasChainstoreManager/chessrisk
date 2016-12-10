@@ -1,16 +1,13 @@
-'''
+"""
 Chessrisk
 If you thought Risk was too short...
-'''
+"""
 import sys
 import os
-import mock
 import json
 import argparse
 import multiprocessing
-from random import randint
 from pprint import pprint
-from copy import deepcopy
 
 import global_vars as gv
 import utils
@@ -31,7 +28,7 @@ next_game_stage = None
 
 
 def print_welcome_message():
-    utils.blockprnt([
+    gv.prnt.blockprnt([
         "---------------------------------------------------------------",
         "Welcome to Chessrisk v{0}.{1}".format(gv.ver_maj, gv.ver_min),
         "This version is a full square grid of territories with no sea.",
@@ -49,6 +46,8 @@ def setup_game():
     print_welcome_message()
     players.choose_number_of_players()
     players.setup_players()
+    import pdb
+    pdb.set_trace()
     risk.setup_board()
     save.checkpoint('initial')
 
@@ -85,9 +84,9 @@ def pre_round():
     gv.ROUND_NUMBER += 1
     save.checkpoint('round_start')
 
-    utils.prnt("------------------------")
-    utils.prnt("- Round: " + str(gv.ROUND_NUMBER) + "-")
-    utils.prnt("------------------------")
+    gv.prnt("------------------------")
+    gv.prnt("- Round: " + str(gv.ROUND_NUMBER) + "-")
+    gv.prnt("------------------------")
     gv.BOARD.print_board()
 
 
@@ -135,8 +134,8 @@ def run_game(answer_queue, response_queue, worker=False, game_id=''):
         restore_saved_game()
     except utils.UserQuitException:
         save.save('last_quit')
-        utils.prnt("Byeeee!")
-        quit()
+        gv.prnt("Byeeee!")
+        sys.exit(0)
 
 
 @app.route('/serverfunc', methods=['POST'])

@@ -1,14 +1,13 @@
-import sys
 import math
 import random
-import json
 
 import global_vars as gv
 import chess
 import save
 import players
 
-from utils import prnt
+
+TERRITORY_NAMES_FILE = 'territory_names.chr'
 
 
 class Territory(object):
@@ -66,8 +65,7 @@ class Board(object):
 
         return j
 
-
-    def create_new(self, terr_names_file='territory_names.chr'):
+    def create_new(self, terr_names_file=TERRITORY_NAMES_FILE):
         self.nrows = random.randint(3,5)
         self.ncols = random.randint(3,5)
         self.nterrs = self.nrows*self.ncols
@@ -93,7 +91,7 @@ class Board(object):
         gv.TERRITORIES = self.construct_territory_dict()
 
     # board object should be a list of lists with a territory in each entry
-    def __init__(self, load_string=None, terr_names_file='territory_names.chr', dummy=None):
+    def __init__(self, load_string=None, terr_names_file=TERRITORY_NAMES_FILE, dummy=None):
         if dummy:
             pass
         elif load_string:
@@ -176,7 +174,7 @@ class Board(object):
         
     def print_board(self):
         w = 10.
-        prnt(' '*int(float(self.ncols)*(w+1.)/2. - 8.) + "~~~ The World ~~~", clear=True)
+        gv.prnt(' '*int(float(self.ncols)*(w+1.)/2. - 8.) + "~~~ The World ~~~", clear=True)
 
         for row in xrange(self.nrows):
             subrows = ['']*4
@@ -207,17 +205,17 @@ class Board(object):
                 subrows[isr]+='|'
 
             for subrow in subrows:
-                prnt(subrow)
+                gv.prnt(subrow)
 
-        prnt(('+' + '-'*int(w))*self.ncols+'+')
+        gv.prnt(('+' + '-'*int(w))*self.ncols+'+')
 
-        prnt(' '*int(float(self.ncols)*(w+1.)/2. - 8.) + "~~~~~~~~~~~~~~~~~")
+        gv.prnt(' '*int(float(self.ncols)*(w+1.)/2. - 8.) + "~~~~~~~~~~~~~~~~~")
 
 
 def setup_board():
-    prnt("Setting up the risk board.")
-    prnt("In this version, territories are set up randomly.")
-    prnt("In this version, initial army placement is randomised.")
+    gv.prnt("Setting up the risk board.")
+    gv.prnt("In this version, territories are set up randomly.")
+    gv.prnt("In this version, initial army placement is randomised.")
     gv.BOARD = Board()
 
 
@@ -274,19 +272,19 @@ def process_build_turn():
 
     while gv.N_REINFORCE_ARMIES > 0:
         save.checkpoint('during_build_turn')
-        prnt("You have " + str(gv.N_REINFORCE_ARMIES) + " armies to place.")
+        gv.prnt("You have " + str(gv.N_REINFORCE_ARMIES) + " armies to place.")
         gv.N_REINFORCE_ARMIES = reinforce_a_territory(gv.N_REINFORCE_ARMIES)
 
 
 def choose_attack_from():
-    prnt("Choose territory to attack from, from the following list:")
+    gv.prnt("Choose territory to attack from, from the following list:")
 
     attack_from_list = []
     for territory in gv.TERRITORIES.values():
         if territory.owner == gv.CURR_PLAYER and territory.narmies > 1:
             for neighbour in territory.neighbours:
                 if neighbour.owner != gv.CURR_PLAYER:
-                    prnt(territory.name)
+                    gv.prnt(territory.name)
                     attack_from_list.append(territory.lname)
                     break
 
@@ -299,12 +297,12 @@ def choose_attack_from():
 
 
 def choose_attack_to():
-    prnt("Choose territory to attack, from the following list:")
+    gv.prnt("Choose territory to attack, from the following list:")
 
     attack_to_list = []
     for territory in gv.TERRITORIES[gv.ATTACK_FROM].neighbours:
         if territory.owner != gv.CURR_PLAYER:
-            prnt(territory.name)
+            gv.prnt(territory.name)
             attack_to_list.append(territory.lname)
 
     gv.UI.clear_inv_choices()
@@ -316,7 +314,7 @@ def choose_attack_to():
 
 
 def choose_narmies_to_attack_with():
-    prnt("There are " + str(gv.TERRITORIES[gv.ATTACK_FROM].narmies-1)
+    gv.prnt("There are " + str(gv.TERRITORIES[gv.ATTACK_FROM].narmies-1)
                 + " armies available for attack.")
 
     gv.UI.clear_inv_choices()
@@ -342,14 +340,14 @@ def attackable_neighbours_exist():
                 if neighbour.owner != gv.CURR_PLAYER:
                     able_to_attack = True
     if not able_to_attack:
-        prnt("No possiblities for attack!")
+        gv.prnt("No possiblities for attack!")
     return able_to_attack
 
 
 def process_attack_turn():
     save.checkpoint('start_of_attack_turn')
     if not attackable_neighbours_exist() and not gv.RESTORING:
-        prnt("Not possible to attack! Build instead.")
+        gv.prnt("Not possible to attack! Build instead.")
         process_build_turn()
 
     while attackable_neighbours_exist() or gv.RESTORING:
@@ -373,12 +371,12 @@ def process_attack_turn():
                         gv.DEFENDER
                         )
         if narmies_defender == 0:
-            prnt("{0} defeated!".format(gv.TERRITORIES[gv.ATTACK_TO].owner))
+            gv.prnt("{0} defeated!".format(gv.TERRITORIES[gv.ATTACK_TO].owner))
             gv.TERRITORIES[gv.ATTACK_FROM].narmies -= gv.N_ATTACK_ARMIES
             gv.TERRITORIES[gv.ATTACK_TO].narmies = narmies_attacker
             gv.TERRITORIES[gv.ATTACK_TO].reassign_owner(gv.CURR_PLAYER)
         else:
-            prnt("{0} repelled!".format(gv.CURR_PLAYER))
+            gv.prnt("{0} repelled!".format(gv.CURR_PLAYER))
             gv.TERRITORIES[gv.ATTACK_FROM].narmies -= \
                                 gv.N_ATTACK_ARMIES - narmies_attacker
             gv.TERRITORIES[gv.ATTACK_TO].narmies = narmies_defender
@@ -387,7 +385,7 @@ def process_attack_turn():
         save.checkpoint('after_battle')
         gv.BOARD.print_board()
 
-        prnt("Continue to attack, (y)es or (n)o?")
+        gv.prnt("Continue to attack, (y)es or (n)o?")
         attack_some_more = False
         while attack_some_more is False:
             response = gv.UI.handle_user_input('')
@@ -401,7 +399,7 @@ def eliminate_dead_players():
     if gv.RESTORING:
         for player in gv.PLAYERS.keys():
             if count_owned_territories(player) == 0:
-                prnt("{0} is out!".format(player))
+                gv.prnt("{0} is out!".format(player))
                 del gv.PLAYERS[player]
     else:
         pass
@@ -412,7 +410,7 @@ def check_for_victory():
         return False
     else:
         if len(gv.PLAYERS) == 1:
-            prnt("{0} wins!".format(gv.PLAYERS.keys()[0]))
+            gv.prnt("{0} wins!".format(gv.PLAYERS.keys()[0]))
             return True
         else:
             return False

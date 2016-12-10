@@ -2,8 +2,10 @@ import unittest2 as unittest
 import mock
 
 import sys
+import os
 
-sys.path.append('../')
+os.chdir('../')
+sys.path.append('./')
 
 import chessrisk
 import utils
@@ -74,7 +76,7 @@ class FakeInput(object):
                 user_input = v
                 break
         else:
-            raise FakeInputException
+            raise FakeInputException('Message not found in self.inputs: {msg}'.format(msg=message))
 
         # If a list was given, pop from the list
         if isinstance(user_input, list):
@@ -93,6 +95,9 @@ class FakeInput(object):
 
         return user_input
 
+    def __call__(self, message, cast_lower=True, clear=False):
+        return self.fake_input(message)
+
 
 class TestIntegrationCmdLine(unittest.TestCase):
     """Test the commandline game.
@@ -110,7 +115,7 @@ class TestIntegrationCmdLine(unittest.TestCase):
             FakeInput(inputs)
         ).start()
 
-        mock.patch.object(chessrisk.utils, 'prnt').start()
+        mock.patch.object(chessrisk.utils.Printer, '__call__').start()
 
     @classmethod
     def tearDownClass(cls):
@@ -120,10 +125,22 @@ class TestIntegrationCmdLine(unittest.TestCase):
         """Can set a game up, then quit"""
 
         # Set up a bunch of inputs for the setup stage
-        chessrisk.utils.UserInputter.handle_user_input.inputs = {}
+        chessrisk.utils.UserInputter.handle_user_input.inputs = {
+            'enter to begin': '\n',
+            'How many human players are there': '2',
+            'How many computer players would you like?': '0',
+            'Player 1:\nWhat would you like to be called?': 'Jimbo',
+            'Jimbo, choose a mark from': 'bl',
+            'Player 2:\nWhat would you like to be called?': 'Fred',
+            'Fred, choose a mark from': 're',
+            'Fred, (b)uild or (a)ttack': 'x'
+        }
 
-        # Run the game in cmdline mode. worker=False by default.
-        chessrisk.run_game(None, None)
+        with self.assertRaises(SystemExit) as cm:
+            # Run the game in cmdline mode. worker=False by default.
+            chessrisk.run_game(None, None)
+
+        self.assertEqual(cm.exception.code, 0)
 
 
 if __name__ == "__main__":
