@@ -46,8 +46,6 @@ def setup_game():
     print_welcome_message()
     players.choose_number_of_players()
     players.setup_players()
-    import pdb
-    pdb.set_trace()
     risk.setup_board()
     save.checkpoint('initial')
 

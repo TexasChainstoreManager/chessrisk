@@ -105,16 +105,25 @@ class TestIntegrationCmdLine(unittest.TestCase):
     """
     @classmethod
     def setUpClass(cls):
-        inputs = {
-
+        # Standard set of fake user input for setup
+        cls.inputs = {
+            'enter to begin': '\n',
+            'How many human players are there': '2',
+            'How many computer players would you like?': '0',
+            'Player 1:\nWhat would you like to be called?': 'Jimbo',
+            'Jimbo, choose a mark from': 'bl',
+            'Player 2:\nWhat would you like to be called?': 'Fred',
+            'Fred, choose a mark from': 're',
         }
-        # We might need to mock handle_user_input and prnt everywhere they're imported! :(
+
+        # Mock user input
         mock.patch.object(
             chessrisk.utils.UserInputter,
             'handle_user_input',
-            FakeInput(inputs)
+            FakeInput(cls.inputs)
         ).start()
 
+        # Mock terminal output
         mock.patch.object(chessrisk.utils.Printer, '__call__').start()
 
     @classmethod
@@ -123,18 +132,9 @@ class TestIntegrationCmdLine(unittest.TestCase):
 
     def test_setup_and_quit(self):
         """Can set a game up, then quit"""
-
-        # Set up a bunch of inputs for the setup stage
-        chessrisk.utils.UserInputter.handle_user_input.inputs = {
-            'enter to begin': '\n',
-            'How many human players are there': '2',
-            'How many computer players would you like?': '0',
-            'Player 1:\nWhat would you like to be called?': 'Jimbo',
-            'Jimbo, choose a mark from': 'bl',
-            'Player 2:\nWhat would you like to be called?': 'Fred',
-            'Fred, choose a mark from': 're',
+        self.inputs.update({
             'Fred, (b)uild or (a)ttack': 'x'
-        }
+        })
 
         with self.assertRaises(SystemExit) as cm:
             # Run the game in cmdline mode. worker=False by default.
