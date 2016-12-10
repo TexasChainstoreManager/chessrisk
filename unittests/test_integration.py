@@ -11,47 +11,6 @@ import chessrisk
 import utils
 
 
-# from StringIO import StringIO
-#
-#
-# def foo():
-#     print 'something'
-#
-#
-# # Test the print function like this, but test the rest of the game in terms of calls to the print function
-# @patch('sys.stdout', new_callable=StringIO)
-# def test(mock_stdout):
-#     foo()
-#     assert mock_stdout.getvalue() == 'something'
-#
-#
-#
-# class TestIntegration(unittest.TestCase):
-#
-#     @patch('sys.stdout', new_callable=StringIO)
-#     def test_some_io(self, mock_stdout):
-#
-#         self.assertTrue(mock_stdout.getvalue() == 'Foo')
-
-
-# class Mocker(object):
-#     """ I wrote this when I thought I didn't have access to the mock module"""
-#     def __init__(self):
-#         self.patched = {}
-#
-#     def patch(self, obj, attrname, mock):
-#         self.patched[(obj, attrname)] = obj.__getattr__(attrname)
-#         obj.__setattr__(attrname, mock)
-#
-#     def unpatch(self, obj, attrname):
-#         orig = self.patched[(obj, attrname)]
-#         obj.__setattr__(attrname, orig)
-#
-#     def unpatch_all(self):
-#         for (obj, attrname) in self.patched.keys():
-#             self.unpatch(obj, attrname)
-
-
 class FakeInputException(Exception):
     message = "No fake input found"
 
