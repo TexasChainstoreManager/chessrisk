@@ -4,11 +4,19 @@ import mock
 import sys
 import os
 
+import random
+from copy import deepcopy
+
 os.chdir('../')
 sys.path.append('./')
 
 import chessrisk
 import utils
+
+
+def read_territory_names():
+    with open(chessrisk.risk.TERRITORY_NAMES_FILE) as f:
+        return [x.strip() for x in f.readlines()]
 
 
 class FakeInputException(Exception):
@@ -32,14 +40,14 @@ class FakeInput(object):
         # only need to write part of the message
         for k, v in self.inputs.iteritems():
             if k in message:
-                user_input = v
+                user_input = str(v)
                 break
         else:
             raise FakeInputException('Message not found in self.inputs: {msg}'.format(msg=message))
 
         # If a list was given, pop from the list
         if isinstance(user_input, list):
-            if len(user_input) > 1 :
+            if len(user_input) > 1:
                 user_input = user_input.pop()
             else:
                 user_input = user_input[0]
@@ -59,8 +67,7 @@ class FakeInput(object):
 
 
 class TestIntegrationCmdLine(unittest.TestCase):
-    """Test the commandline game.
-    Mock out the user input and stdout, and some other things like saving and loading.
+    """Base class for common mocking and main game setup
     """
     @classmethod
     def setUpClass(cls):
@@ -89,6 +96,34 @@ class TestIntegrationCmdLine(unittest.TestCase):
     def tearDownClass(cls):
         mock.patch.stopall()
 
+
+class RandomStringPicker(object):
+    """When my string representation is produced, I pick one randomly from a list.
+    """
+    def __init__(self, pick_from):
+        self.pick_from = pick_from
+        self.last_choice = ''
+
+    def __str__(self):
+        self.last_choice = random.choice(self.pick_from)
+        return self.last_choice
+
+
+class DoThenString(object):
+    """When my string representation is produced, I call a function first.
+    """
+    def __init__(self, do, string):
+        self.do = do
+        self.string = string
+
+    def __str__(self):
+        self.latest_return = self.do()
+        return self.string
+
+
+class TestIntegrationCmdLineRisk(TestIntegrationCmdLine):
+    """Test for Risk parts of the game - building and risk-style battles.
+    """
     def test_setup_and_quit(self):
         """Can set a game up, then quit"""
         self.inputs.update({
@@ -100,6 +135,68 @@ class TestIntegrationCmdLine(unittest.TestCase):
             chessrisk.run_game(None, None)
 
         self.assertEqual(cm.exception.code, 0)
+
+    def test_build_quit(self):
+        """Can set a game up, build 1 army, then quit
+        """
+        # We keep trying random territory names until one is valid.
+        terr_names = [x.lower() for x in read_territory_names()]
+        random_terr_name = RandomStringPicker(terr_names)
+
+        board_then_b = DoThenString(
+            lambda: deepcopy(chessrisk.gv.TERRITORIES), 'b')
+
+        self.inputs.update({
+            'Fred, (b)uild or (a)ttack': board_then_b,
+            'Select a territory to reinforce': random_terr_name,
+            'Invalid territory choice': '\n',
+            'Not your territory': '\n',
+            'Add how many armies': '1',
+            'Jimbo, (b)uild or (a)ttack': 'x'
+        })
+
+        with self.assertRaises(SystemExit) as cm:
+            # Run the game in cmdline mode. worker=False by default.
+            chessrisk.run_game(None, None)
+        self.assertEqual(cm.exception.code, 0)
+
+        initial_board = board_then_b.latest_return
+        self.assertEqual(
+            initial_board[random_terr_name.last_choice].narmies + 1,
+            chessrisk.gv.TERRITORIES[random_terr_name.last_choice].narmies
+        )
+
+    def test_build_build_quit(self):
+        pass
+
+    def test_risk(self):
+        pass
+
+    def test_chess(self):
+        pass
+
+    def test_build_risk(self):
+        pass
+
+    def test_build_chess(self):
+        pass
+
+    def test_build_risk_build(self):
+        pass
+
+    def test_build_build_risk(self):
+        pass
+
+
+class TestIntegrationCmdLineChess(TestIntegrationCmdLine):
+    """Test for Chess parts of the game - the chess-style battle functionality.
+    """
+
+    def test_chess(self):
+        pass
+
+
+# TODO: classes to test save and load
 
 
 if __name__ == "__main__":
