@@ -1,14 +1,16 @@
-PTH="$(realpath ../)";
+#!/bin/bash
+PTH=`pwd`/../
+echo $PTH
 cd $PTH
-python Chessrisk.py &
+python2 chessrisk.py &
 #CRPID=$!
 #echo $CRPID
 # This is a race condition but I can't be bothered to fix it
 sleep 2
 cd -
-curl --data "$1" localhost:5000/ >last_request
+curl --data "$1" localhost:5000/ >last_request.html
 sudo ln -s "$PTH"/static /static || :
-open file:///"$PTH"/test_frontend/last_request
+open file:///"$PTH"/test_frontend/last_request.html
 
 
 function cleanup() {
