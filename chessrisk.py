@@ -126,10 +126,11 @@ def run_game(answer_queue, response_queue, worker=False, game_id=''):
     gv.HEADLESS = worker
     gv.GAME_ID = game_id
     try:
-        setup_game()
-        main_loop()
-    except utils.LoadException:
-        restore_saved_game()
+        try:
+            setup_game()
+            main_loop()
+        except utils.LoadException:
+            restore_saved_game()
     except utils.UserQuitException:
         save.save('last_quit')
         gv.prnt("Byeeee!")

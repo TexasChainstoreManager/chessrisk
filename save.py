@@ -6,6 +6,8 @@ from pprint import pprint
 
 import global_vars as gv
 
+from utils import mkdir_p
+
 
 def serialise():
     j = '{'
@@ -40,6 +42,7 @@ def serialise():
 def save(filename):
     if not gv.RESTORING:
         j = serialise()
+        mkdir_p(os.path.dirname(os.path.join('saves', filename)))
         with open(os.path.join('saves', filename), 'w') as save_file:
             save_file.write(j)
 

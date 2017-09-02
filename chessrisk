@@ -1,1 +1,1 @@
-python Chessrisk.py --cmdline
+python2 Chessrisk.py --cmdline
