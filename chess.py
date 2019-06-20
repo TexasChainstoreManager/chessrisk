@@ -47,12 +47,12 @@ def risk_style(n_attack_armies, n_defend_armies, attacker, defender):
         for attd in attack_dice:
             gv.UI.handle_user_input("{0}".format(attd), player=attacker)
             if gv.AI_PLAYERS_ARE_PLAYING:
-                sleep(0.3)
+                sleep(gv.AI_PRINT_DELAY)
         gv.UI.handle_user_input("{0}, press enter to roll:".format(defender))
         for defd in defend_dice:
             gv.UI.handle_user_input("{0}".format(defd), player=defender)
             if gv.AI_PLAYERS_ARE_PLAYING:
-                sleep(0.3)
+                sleep(gv.AI_PRINT_DELAY)
 
         defend_dice.sort(reverse=True)
         attack_dice.sort(reverse=True)
@@ -255,7 +255,7 @@ def print_board(part, clear=False):
         files_string += '  {0} '.format(file_name)
     gv.prnt(' {0} '.format(files_string))
     if gv.AI_PLAYERS_ARE_PLAYING:
-        sleep(0.5)
+        sleep(gv.AI_PRINT_DELAY)
 
 
 def choose_pieces(player, n_armies):

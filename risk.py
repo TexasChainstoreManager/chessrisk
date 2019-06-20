@@ -212,7 +212,7 @@ class Board(object):
 
         gv.prnt(' '*int(float(self.ncols)*(w+1.)/2. - 8.) + "~~~~~~~~~~~~~~~~~")
         if gv.AI_PLAYERS_ARE_PLAYING:
-            sleep(0.5)
+            sleep(gv.AI_PRINT_DELAY)
 
 
 def setup_board():
