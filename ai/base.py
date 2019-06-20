@@ -35,7 +35,7 @@ class AiPlayer(object):
         """This is how we choose which method to run based on message contents."""
         message_dispatch = {
            'resolve (R)isk style, or (c)hess style?': self.risk_style_or_chess_style,
-           'press enter to roll': lambda *args: '\n',
+           'press enter': lambda *args: '\n',
            'continue the battle': self.continue_to_attack,
            'how many files': self.choose_board_layout,
            'armies left': self.choose_chess_piece,

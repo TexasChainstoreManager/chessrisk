@@ -5,10 +5,16 @@ import random
 
 class Simpleton(AiPlayer):
     number_of_us = 0
+    
+    def __init__(self):
+        super(Simpleton, self).__init__()
+        self.__name = None
 
     def name(self, gv):
-        type(self).number_of_us += 1
-        return 'Simpleton{}'.format(type(self).number_of_us)
+        if self.__name is None:
+            type(self).number_of_us += 1
+            self.__name = '{}Simpleton'.format(type(self).number_of_us)
+        return self.__name
 
     def build_or_attack(self, gv):
         return random.choice(('b', 'a'))
@@ -64,3 +70,9 @@ class Simpleton(AiPlayer):
 
     def load(self, data):
         return '"Nothing to load"'
+
+    def lose(self, gv):
+        gv.prnt('{}: Nooooooo!'.format(self.name(gv)))
+
+    def win(self, gv):
+        gv.prnt('{}: In your FACE!'.format(self.name(gv)))

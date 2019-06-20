@@ -413,6 +413,14 @@ def eliminate_dead_players():
         for player in gv.PLAYERS.keys():
             if count_owned_territories(player) == 0:
                 gv.prnt("{0} is out!".format(player))
+
+                # A hook that can get called if the player has lost.
+                if (
+                    hasattr(gv.PLAYERS[player], 'lose')
+                    and callable(gv.PLAYERS[player].lose)
+                ):
+                    gv.PLAYERS[player].lose()
+
                 del gv.PLAYERS[player]
     else:
         pass
@@ -423,7 +431,16 @@ def check_for_victory():
         return False
     else:
         if len(gv.PLAYERS) == 1:
-            gv.prnt("{0} wins!".format(gv.PLAYERS.keys()[0]))
+            winner = gv.PLAYERS.keys()[0]
+            gv.prnt("{0} wins!".format(winner))
+
+            # A hook that can get called if the player has won.
+            if (
+                    hasattr(gv.PLAYERS[winner], 'win')
+                    and callable(gv.PLAYERS[winner].win)
+            ):
+                gv.PLAYERS[winner].win()
+
             return True
         else:
             return False

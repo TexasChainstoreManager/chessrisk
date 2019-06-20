@@ -311,6 +311,9 @@ def choose_placement(player_type, player, pieces):
         pos = gv.UI.user_input_check_choices('Please choose square, example: "G3"', player=player)
 
         file_, rank = coords(pos)
+        if gv.CHESSBOARD[file_][rank] != ' ':
+            gv.prnt("There's already a piece there, try again")
+            continue
 
         if player_type == 'attacker':
             piece_symbol = piece.lower()
@@ -402,7 +405,7 @@ def process_move(player_type, player, opponents_pieces):
     if gv.CHESSBOARD[file_to][rank_to] != ' ':
         captured_piece = gv.CHESSBOARD[file_to][rank_to]
         gv.UI.handle_user_input('{0} captured!'.format(captured_piece), player=player)
-        opponents_pieces.remove(captured_piece)
+        opponents_pieces.remove(captured_piece.lower())
     gv.CHESSBOARD[file_to][rank_to] = piece
     gv.CHESSBOARD[file_][rank] = ' '
     if check_or_mate(player_type):
@@ -410,7 +413,7 @@ def process_move(player_type, player, opponents_pieces):
         return 'checkmate'
 
     if piece.lower() == 'p':
-        promote_pawn(player_type, file_to, rank_to)
+        promote_pawn(player_type, file_to, rank_to, player)
 
     # We return False because by this point,
     # withdraw has not been selcted.
@@ -459,7 +462,7 @@ def check_for_check(active_player_type):
     return False
 
 
-def promote_pawn(player_type, file_, rank):
+def promote_pawn(player_type, file_, rank, player):
     global NRANKS
     promote = False
     if player_type == 'attacker':

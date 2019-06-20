@@ -4,9 +4,11 @@ import random
 
 # TODO: importing ai modules programmatically using the imp module.
 from ai import simpleton
+from ai import learning_simpleton
 
 ai_modules = {
     'simpleton': simpleton.Simpleton,
+    'learning_simpleton': learning_simpleton.LearningSimpleton
 }
 chosen_ai_modules = []
 
@@ -60,7 +62,7 @@ def choose_number_of_players():
             lambda x: not x.isdigit()})
     gv.UI.set_inv_choice({
             "You must have >=0.":
-            lambda x: int(x) <= 0})
+            lambda x: int(x) < 0})
     gv.UI.set_inv_choice({
             "6 players is the maximum (have you never played Risk?)":
             lambda x: int(x) > 6})
