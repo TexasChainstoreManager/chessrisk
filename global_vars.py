@@ -30,6 +30,10 @@ ANSWERS = {}
 
 CHECK = {'attacker': False, 'defender': False}
 
+# Will be populated with a dict of modules that contain the AI player classes
+AI_MODULES = {}
+CHOSEN_AI_MODULES = []
+
 # Not currently used, there are problems creating objects with the correct type
 # We have used a special-case PlayersDict class instead, since this is the only use
 # for a SaveDict so far.

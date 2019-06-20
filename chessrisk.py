@@ -27,6 +27,14 @@ game_id = None
 next_game_stage = None
 
 
+# TODO: importing ai modules programmatically using the imp module.
+from ai import simpleton
+
+gv.AI_PLAYERS = {
+    'simpleton': simpleton.Simpleton,
+}
+
+
 def print_welcome_message():
     gv.prnt.blockprnt([
         "---------------------------------------------------------------",

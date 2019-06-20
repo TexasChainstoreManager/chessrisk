@@ -293,7 +293,7 @@ def choose_attack_from():
             "Can't attack from there, choose again!":
             lambda x: x not in attack_from_list})
 
-    return gv.UI.user_input_check_choices('')
+    return gv.UI.user_input_check_choices('from: ')
 
 
 def choose_attack_to():
@@ -310,7 +310,7 @@ def choose_attack_to():
             "Can't attack there, choose again!":
             lambda x: x not in attack_to_list})
 
-    return gv.UI.user_input_check_choices('')
+    return gv.UI.user_input_check_choices('to: ')
 
 
 def choose_narmies_to_attack_with():
@@ -388,7 +388,7 @@ def process_attack_turn():
         gv.prnt("Continue to attack, (y)es or (n)o?")
         attack_some_more = False
         while attack_some_more is False:
-            response = gv.UI.handle_user_input('')
+            response = gv.UI.handle_user_input('continue: ')
             if response in ['y', 'yes']:
                 attack_some_more = True
             if response in ['n', 'no']:

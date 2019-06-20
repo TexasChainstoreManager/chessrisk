@@ -134,11 +134,15 @@ class UserInputter():
             user_input = None
             while user_input in [None]:
                 gv.prnt('>>')
+                curr_player = gv.PLAYERS[gv.CURR_PLAYER]
                 if gv.HEADLESS:
                     input_func = sys.stdin.readline
+                elif curr_player.is_ai:
+                    # If this is an AI player, dispatch to its turn processing methods
+                    # This returns a function that, when called, returns the desired string
+                    input_func = curr_player.dispatch_message(message)
                 else:
                     input_func = raw_input
-
                 # if cast_lower:
                 #     user_input = sys.stdin.readline()
                 # else:

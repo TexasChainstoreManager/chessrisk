@@ -1,4 +1,5 @@
 import global_vars as gv
+import random
 
 
 class PlayersDict(dict):
@@ -23,8 +24,10 @@ class PlayersDict(dict):
 
 
 class Player(object):
-    def __init__(self, colour):
+    def __init__(self, colour, ai_instance=None):
         self.colour = colour
+        self.ai_instance = ai_instance
+        self.is_ai = bool(self.ai_instance)
 
     def save(self):
         if self.colour == None:
@@ -46,8 +49,8 @@ def choose_number_of_players():
             "Please enter a number":
             lambda x: not x.isdigit()})
     gv.UI.set_inv_choice({
-            "You must have >1 as there is no AI yet.":
-            lambda x: int(x) < 1})
+            "You must have >=0.":
+            lambda x: int(x) <= 0})
     gv.UI.set_inv_choice({
             "6 players is the maximum (have you never played Risk?)":
             lambda x: int(x) > 6})
@@ -63,8 +66,13 @@ def choose_number_of_players():
             "Computer players not available yet!":
             lambda x: int(x) is not 0})
 
-    gv.N_COMP_PLAYERS = int(gv.UI.user_input_check_choices(
-            "How many computer players would you like?", clear=True))
+    player_module = ''
+    while player_module not in ('p', 'play'):
+        player_module = gv.UI.user_input_check_choices(
+            "Adding computer players:\n"
+            "  Type the name of a module in the 'ai' directory to add a player of that type.\n"
+            "  Or type '(p)lay' to start playing.", clear=True)
+        gv.CHOSEN_AI_MODULES.append(player_module)
 
 
 def choose_colour(name):
@@ -86,3 +94,8 @@ def setup_players():
     for iplayer in xrange(gv.N_HUMAN_PLAYERS):
         name = choose_player_name(iplayer)
         gv.PLAYERS[name] = Player(choose_colour(name))
+
+    for ai_class in gv.CHOSEN_AI_MODULES:
+        ai_instance = ai_class()
+        color = random.choice(gv.PLAYER_COLORS)
+        gv.PLAYERS[ai_instance.name()] = Player(color, ai_instance=ai_instance)
