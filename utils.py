@@ -97,7 +97,7 @@ class UserInputter():
     def set_inv_choice(self, inv_choice):
         self.inv_choices.update(inv_choice)
 
-    def user_input_check_choices(self, message, clear=False):
+    def user_input_check_choices(self, message, clear=False, player=None):
         if gv.RESTORING:
             user_input = fake_user_input_during_restore(message)
         elif gv.HEADLESS:
@@ -106,7 +106,7 @@ class UserInputter():
         else:
             valid_choice = False
             while valid_choice == False:
-                user_input = self.handle_user_input(message, clear=clear)
+                user_input = self.handle_user_input(message, clear=clear, player=player)
                 valid_choice = True
                 if user_input == '':
                     valid_choice = False
@@ -120,7 +120,10 @@ class UserInputter():
                         break
         return user_input
         
-    def handle_user_input(self, message, cast_lower=True, clear=False):
+    def handle_user_input(self, message, cast_lower=True, clear=False, player=None):
+        # By default, the player whose turn it is makes the input.
+        # We need to know who is inputting, so we know which bot to run for AI.
+        player = player or gv.CURR_PLAYER
         if gv.RESTORING:
             if gv.DEBUG:
                 gv.prnt(message)
@@ -134,13 +137,13 @@ class UserInputter():
             user_input = None
             while user_input in [None]:
                 gv.prnt('>>')
-                curr_player = gv.PLAYERS[gv.CURR_PLAYER]
+                curr_player = gv.PLAYERS.get(player)
                 if gv.HEADLESS:
                     input_func = sys.stdin.readline
-                elif curr_player.is_ai:
+                elif curr_player is not None and curr_player.is_ai:
                     # If this is an AI player, dispatch to its turn processing methods
                     # This returns a function that, when called, returns the desired string
-                    input_func = curr_player.dispatch_message(message)
+                    input_func = curr_player.ai_instance.dispatch_message(message, gv)
                 else:
                     input_func = raw_input
                 # if cast_lower:
@@ -150,6 +153,8 @@ class UserInputter():
                 user_input = input_func()
                 if cast_lower:
                     user_input = user_input.lower()
+                if curr_player is not None and curr_player.is_ai:
+                    gv.prnt(user_input, clear=False)
             if user_input in ['exit', 'x']:
                 raise UserQuitException
             if user_input in ['s', 'save']:

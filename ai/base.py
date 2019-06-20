@@ -31,17 +31,17 @@ class AiPlayer(object):
         self.__reinforce = None
         self.__attack_from_to = None
 
-    def dispatch_message(self, message):
+    def dispatch_message(self, message, gv):
         """This is how we choose which method to run based on message contents."""
         message_dispatch = {
            'resolve (R)isk style, or (c)hess style?': self.risk_style_or_chess_style,
-           'press enter to roll': lambda: '\n',
+           'press enter to roll': lambda *args: '\n',
            'continue the battle': self.continue_to_attack,
            'how many files': self.choose_board_layout,
            'armies left': self.choose_chess_piece,
            'choose a piece to place': self.choose_piece_to_place,
            'please choose square': self.choose_square_to_place_it,
-           'you have no valid moves': lambda: 'd',
+           'you have no valid moves': lambda *args: 'd',
            'choose a piece to move by entering its coordinates': self.choose_piece_to_move,
            'move to which square': self.choose_move_where,
            'pawn promoted': self.pawn_promoted,
@@ -53,11 +53,11 @@ class AiPlayer(object):
            'continue': self.continue_to_attack,  # to attack
            '(b)uild or (a)ttack': self.build_or_attack,
         }
-        for k, v in message_dispatch:
+        for k, v in message_dispatch.items():
             if k.lower() in message.lower():
-                return v
+                return lambda: v(gv)
         # If the message doesn't have an associated method, just 'press enter'
-        return lambda: '\n'
+        return lambda *args: '\n'
 
     def name(self, gv):
         raise NotImplementedError
@@ -96,39 +96,88 @@ class AiPlayer(object):
     def pawn_promoted(self, gv):
         raise NotImplementedError
 
+    def __multi_move(self, method, tuple_length, tuple_index):
+        """This allows running one method for multiple questions. Call this in a question function.
+
+        method: the method to call, it should return a tuple giving the answers to a series of questions.
+        tuple_length: the length of the tuple it's supposed to return.
+        tuple_index: the element of the tuple that we want to use for THIS answer.
+        return value: a function that takes in gv (the globals module) and returns a string - this string is the answer.
+        """
+        def wrapped(gv):
+            result = method(gv)
+            if not isinstance(result, tuple) and len(result) != tuple_length:
+                raise ValueError('return value of {} must be {}'.format(method, tuple_length))
+            return result[tuple_index]
+        return wrapped
+
     def attack_from(self, gv):
-        self.__attack_from_to = self.attack_from_to(gv)
-        return self.__attack_from_to[0]
+        return self.__multi_move(
+            self.attack_from_to,
+            tuple_length=3,
+            tuple_index=0,
+        )(gv)
 
     def attack_to(self, gv):
-        return self.__attack_from_to[1]
+        return self.__multi_move(
+            self.attack_from_to,
+            tuple_length=3,
+            tuple_index=1,
+        )(gv)
 
     def num_armies_to_attack_with(self, gv):
-        return self.__attack_from_to[2]
-
-    # def press_enter_to_roll(self):
-    #     raise NotImplementedError
-
-    # def hide_screen_and_press_enter(self):
-    #     raise NotImplementedError
+        return self.__multi_move(
+            self.attack_from_to,
+            tuple_length=3,
+            tuple_index=2,
+        )(gv)
 
     def choose_piece_to_place(self, gv):
-        self.__placement = self.place_piece(gv)
-        return self.__placement[0]
+        return self.__multi_move(
+            self.place_piece,
+            tuple_length=2,
+            tuple_index=0,
+        )(gv)
 
     def choose_square_to_place_it(self, gv):
-        return self.__placement[1]
+        return self.__multi_move(
+            self.place_piece,
+            tuple_length=2,
+            tuple_index=1,
+        )(gv)
 
     def select_territory_to_reinforce(self, gv):
-        self.__reinforce = self.reinforce(gv)
-        return self.__reinforce[0]
+        return self.__multi_move(
+            self.reinforce,
+            tuple_length=2,
+            tuple_index=0,
+        )(gv)
 
     def add_how_many_armies(self, gv):
-        return self.__reinforce[1]
+        return self.__multi_move(
+            self.reinforce,
+            tuple_length=2,
+            tuple_index=1,
+        )(gv)
 
     def choose_piece_to_move(self, gv):
-        self.__move_piece = self.move_piece(gv)
-        return self.__move_piece[0]
+        return self.__multi_move(
+            self.move_piece,
+            tuple_length=2,
+            tuple_index=0,
+        )(gv)
 
     def choose_move_where(self, gv):
-        return self.__move_piece[1]
+        return self.__multi_move(
+            self.move_piece,
+            tuple_length=2,
+            tuple_index=1,
+        )(gv)
+
+    def save(self):
+        """Convert any state this AI holds into bytes."""
+        return NotImplementedError
+
+    def load(self, data):
+        """Convert a string of bytes into the state this AI holds."""
+        return NotImplementedError

@@ -1,6 +1,7 @@
 import math
 import random
 import re
+from time import sleep
 
 from copy import deepcopy
 
@@ -35,8 +36,6 @@ def play_chess(n_attack_armies, n_defend_armies, attacker, defender):
 def risk_style(n_attack_armies, n_defend_armies, attacker, defender):
     continue_fight = True
     while continue_fight:
-        gv.prnt.clear_output()
-
         attack_dice = []
         defend_dice = []
         for i in range(min(n_attack_armies, 3)):
@@ -44,12 +43,16 @@ def risk_style(n_attack_armies, n_defend_armies, attacker, defender):
         for i in range(min(n_defend_armies, 2)):
             defend_dice.append(random.randint(1,6))
 
-        gv.UI.handle_user_input("{0}, press enter to roll:".format(attacker))
+        gv.UI.handle_user_input("{0}, press enter to roll:".format(attacker), player=attacker)
         for attd in attack_dice:
-            gv.UI.handle_user_input("{0}".format(attd))
+            gv.UI.handle_user_input("{0}".format(attd), player=attacker)
+            if gv.AI_PLAYERS_ARE_PLAYING:
+                sleep(0.3)
         gv.UI.handle_user_input("{0}, press enter to roll:".format(defender))
-        for attd in defend_dice:
-            gv.UI.handle_user_input("{0}".format(attd))
+        for defd in defend_dice:
+            gv.UI.handle_user_input("{0}".format(defd), player=defender)
+            if gv.AI_PLAYERS_ARE_PLAYING:
+                sleep(0.3)
 
         defend_dice.sort(reverse=True)
         attack_dice.sort(reverse=True)
@@ -69,6 +72,7 @@ def risk_style(n_attack_armies, n_defend_armies, attacker, defender):
             carry_on = gv.UI.handle_user_input("Continue the battle, (y)es or (n)o?")
             if carry_on in ['y', 'yes']:
                 continue_fight = True
+                gv.prnt.clear_output()
             elif carry_on in ['n', 'no']:
                 continue_fight = False
 
@@ -90,21 +94,21 @@ def chess_style(n_attack_armies, n_defend_armies, attacker, defender):
         choose_board_layout(defender)
 
         # Defender chooses pieces first, then attacker
-        gv.UI.handle_user_input(hide_message.format(defender, attacker), clear=True)
+        gv.UI.handle_user_input(hide_message.format(defender, attacker), clear=True, player=defender)
         def_pieces = choose_pieces(defender, n_defend_armies)
-        gv.UI.handle_user_input(hide_message.format(attacker, defender), clear=True)
+        gv.UI.handle_user_input(hide_message.format(attacker, defender), clear=True, player=attacker)
         att_pieces = choose_pieces(attacker, n_attack_armies)
 
         # Defender chooses first
         # Board layout: bottom half of board, defender's
         # unplaced pieces arranged at top
-        gv.UI.handle_user_input(hide_message.format(defender, attacker), clear=True)
+        gv.UI.handle_user_input(hide_message.format(defender, attacker), clear=True, player=defender)
         choose_placement('defender', defender, def_pieces)
 
         # Attacker chooses placement
         # Board layout: top half of board, attacker's
         # unplaced pieces arranged at top
-        gv.UI.handle_user_input(hide_message.format(attacker, defender), clear=True)
+        gv.UI.handle_user_input(hide_message.format(attacker, defender), clear=True, player=attacker)
         choose_placement('attacker', attacker, att_pieces)
 
     # Fight!
@@ -112,7 +116,7 @@ def chess_style(n_attack_armies, n_defend_armies, attacker, defender):
     withdraw = False
     while def_pieces and att_pieces and not withdraw:
         save.checkpoint('during_battle')
-#        gv.UI.handle_user_input(fight_on_message.format(attacker, 'attacker'), clear=True)
+#        gv.UI.handle_user_input(fight_on_message.format(attacker, 'attacker'), clear=True, player=attacker)
 
         result = process_move('attacker', attacker, def_pieces)
         if result == 'withdraw':
@@ -122,7 +126,7 @@ def chess_style(n_attack_armies, n_defend_armies, attacker, defender):
             break
         if stalemate(att_pieces, def_pieces):
             break
-#        gv.UI.handle_user_input(fight_on_message.format(defender, 'defender'), clear=True)
+#        gv.UI.handle_user_input(fight_on_message.format(defender, 'defender'), clear=True, player=defender)
         result = process_move('defender', defender, att_pieces)
         if result == 'checkmate':
             att_pieces = []
@@ -157,7 +161,7 @@ def choose_board_layout(player):
     """
     global NRANKS, NFILES
     
-    gv.prnt('{0}, choose the board layout.'.format(player), clear=True)
+    gv.prnt('{0}, choose the board layout.'.format(player))
     gv.prnt('You must have 8 ranks.')
     gv.UI.clear_inv_choices()
     gv.UI.set_inv_choice({
@@ -173,8 +177,12 @@ def choose_board_layout(player):
         "Can't have less than 2 files.":
         lambda x: int(x) < 2})
 
-    NFILES = int(gv.UI.user_input_check_choices(
-        "How many files would you like (2 to 8)?"))
+    NFILES = int(
+        gv.UI.user_input_check_choices(
+            "How many files would you like (2 to 8)?",
+            player=player,
+        )
+    )
 
     gv.CHESSBOARD = []
     for i in xrange(NFILES):
@@ -224,14 +232,16 @@ def print_board(part, clear=False):
         gv.prnt(str(irank) + creamy_filling['mid'] + '|')
         gv.prnt(' ' + creamy_filling['bot'] + '|')
     gv.prnt(' ' + '+---'*(NFILES) + '+')
-                    
+
     files_string = ''
     for ifile_ in xrange(NFILES):
         file_name = chr(97 + ifile_).upper()
         files_string += '  {0} '.format(file_name)
     gv.prnt(' {0} '.format(files_string))
+    if gv.AI_PLAYERS_ARE_PLAYING:
+        sleep(0.5)
 
-        
+
 def choose_pieces(player, n_armies):
     gv.prnt('{0}, choose your pieces!'.format(player))
     gv.prnt('Values of pieces: ')
@@ -255,7 +265,7 @@ def choose_pieces(player, n_armies):
 
     pieces = ['g']
     while n_armies > 0:
-        pieces.append(gv.UI.user_input_check_choices('{0} armies left.'.format(n_armies)))
+        pieces.append(gv.UI.user_input_check_choices('{0} armies left.'.format(n_armies), player=player))
         n_armies -= gv.CHESSMEN_VALUES[pieces[-1]]
         gv.prnt("Your forces: {0}".format(pieces))
 
@@ -286,7 +296,7 @@ def choose_placement(player_type, player, pieces):
 
         piece = gv.UI.user_input_check_choices('{0}: choose a piece to place from:'
                                                 '\n{1}\n'.format(player, 
-                                                                 unplaced_pieces))
+                                                                 unplaced_pieces), player=player)
 
         max_file = chr(NFILES+96)
         
@@ -298,7 +308,7 @@ def choose_placement(player_type, player, pieces):
             lambda x: not re.match(r'[a-{0}]{1}'
                                      .format(max_file.lower(), valid_ranks), x)})
 
-        pos = gv.UI.user_input_check_choices('Please choose square, example: "G3"')
+        pos = gv.UI.user_input_check_choices('Please choose square, example: "G3"', player=player)
 
         file_, rank = coords(pos)
 
@@ -340,7 +350,7 @@ def process_move(player_type, player, opponents_pieces):
             lambda x: x not in ['w', 'd', 'withdraw', 'do nothing']})
         pos = gv.UI.user_input_check_choices("{0}, you have no valid moves available,"
                                              "enter 'd' to do nothing{1}."
-                                             .format(player, withdraw_string))
+                                             .format(player, withdraw_string), player=player)
         if pos in ['w', 'withdraw']:
             return 'withdraw'
         else:
@@ -364,7 +374,7 @@ def process_move(player_type, player, opponents_pieces):
 
         pos = gv.UI.user_input_check_choices("{} ({}), choose a piece to move by "
                                              "entering its coordinates{}:"
-                                             .format(player, player_type, withdraw_string))
+                                             .format(player, player_type, withdraw_string), player=player)
     
         if pos in ['w', 'withdraw']:
             return 'withdraw'
@@ -384,14 +394,14 @@ def process_move(player_type, player, opponents_pieces):
         "Illegal move, choose properly.":
         lambda x: coords(x) not in valid_moves})
 
-    move_to = gv.UI.user_input_check_choices('Move to which square?')
+    move_to = gv.UI.user_input_check_choices('Move to which square?', player=player)
 
     file_to, rank_to = coords(move_to)
 
     # Move the piece and capture any current occupant
     if gv.CHESSBOARD[file_to][rank_to] != ' ':
         captured_piece = gv.CHESSBOARD[file_to][rank_to]
-        gv.UI.handle_user_input('{0} captured!'.format(captured_piece))
+        gv.UI.handle_user_input('{0} captured!'.format(captured_piece), player=player)
         opponents_pieces.remove(captured_piece)
     gv.CHESSBOARD[file_to][rank_to] = piece
     gv.CHESSBOARD[file_][rank] = ' '
@@ -464,7 +474,7 @@ def promote_pawn(player_type, file_, rank):
             "Please enter k, b, r or q.":
             lambda x: x not in ['k', 'b', 'r', 'q']})
         gv.CHESSBOARD[file_][rank] = gv.UI.user_input_check_choices(
-            'Pawn promoted! Choose (k)night, (b)ishop, (r)ook or (q)ueen.')
+            'Pawn promoted! Choose (k)night, (b)ishop, (r)ook or (q)ueen.', player=player)
         if player_type == 'defender':
             gv.CHESSBOARD[file_][rank] = gv.CHESSBOARD[file_][rank].upper()
 

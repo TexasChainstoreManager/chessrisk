@@ -2,6 +2,15 @@ import global_vars as gv
 import random
 
 
+# TODO: importing ai modules programmatically using the imp module.
+from ai import simpleton
+
+ai_modules = {
+    'simpleton': simpleton.Simpleton,
+}
+chosen_ai_modules = []
+
+
 class PlayersDict(dict):
     """ A dict whose values are objects with a save() method
     """
@@ -44,6 +53,7 @@ class Player(object):
 
 
 def choose_number_of_players():
+    global chosen_ai_modules
     gv.UI.clear_inv_choices()
     gv.UI.set_inv_choice({
             "Please enter a number":
@@ -60,19 +70,21 @@ def choose_number_of_players():
 
     gv.UI.clear_inv_choices()
     gv.UI.set_inv_choice({
-            "Please enter a number":
-            lambda x: not x.isdigit()})
-    gv.UI.set_inv_choice({
-            "Computer players not available yet!":
-            lambda x: int(x) is not 0})
+            "Only these modules are available: {}".format(list(ai_modules.keys())):
+            lambda x: x not in ai_modules and x not in ('p', 'play')})
 
-    player_module = ''
-    while player_module not in ('p', 'play'):
+    while True:
         player_module = gv.UI.user_input_check_choices(
             "Adding computer players:\n"
             "  Type the name of a module in the 'ai' directory to add a player of that type.\n"
-            "  Or type '(p)lay' to start playing.", clear=True)
-        gv.CHOSEN_AI_MODULES.append(player_module)
+            "  Or type '(p)lay' to start playing.\n\n"
+            "Modules available: {}".format(list(ai_modules.keys())), clear=False)
+        if player_module.lower().strip() in ('p', 'play'):
+            break
+        chosen_ai_modules.append(ai_modules[player_module])
+
+    if chosen_ai_modules:
+        gv.AI_PLAYERS_ARE_PLAYING = True
 
 
 def choose_colour(name):
@@ -95,7 +107,7 @@ def setup_players():
         name = choose_player_name(iplayer)
         gv.PLAYERS[name] = Player(choose_colour(name))
 
-    for ai_class in gv.CHOSEN_AI_MODULES:
+    for ai_class in chosen_ai_modules:
         ai_instance = ai_class()
         color = random.choice(gv.PLAYER_COLORS)
-        gv.PLAYERS[ai_instance.name()] = Player(color, ai_instance=ai_instance)
+        gv.PLAYERS[ai_instance.name(gv)] = Player(color, ai_instance=ai_instance)

@@ -14,10 +14,10 @@ class Simpleton(AiPlayer):
         return random.choice(('b', 'a'))
 
     def reinforce(self, gv):
-        return random.choice(gv.TERRITORIES)
+        return random.choice(list(gv.TERRITORIES)), str(random.randint(1, 9))
 
     def attack_from_to(self, gv):
-        return random.choice(gv.TERRITORIES), str(random.randint(1, 4))
+        return random.choice(list(gv.TERRITORIES)), random.choice(list(gv.TERRITORIES)), str(random.randint(1, 9))
 
     def risk_style_or_chess_style(self, gv):
         return random.choice(('r', 'c'))
@@ -34,7 +34,7 @@ class Simpleton(AiPlayer):
     def place_piece(self, gv):
         return (
             # Piece to place
-            random.choice(('p', 'k', 'b', 'r', 'q')),
+            random.choice(('g', 'p', 'k', 'b', 'r', 'q')),
             # Where to place:
             '{}{}'.format(
                 random.choice(('A', 'B', 'C', 'D', 'E', 'F', 'G')),
@@ -58,3 +58,9 @@ class Simpleton(AiPlayer):
 
     def pawn_promoted(self, gv):
         return random.choice(('k', 'b', 'r', 'q'))
+
+    def save(self):
+        return '"Nothing to save"'
+
+    def load(self, data):
+        return '"Nothing to load"'

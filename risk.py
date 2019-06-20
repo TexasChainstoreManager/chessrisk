@@ -1,5 +1,6 @@
 import math
 import random
+from time import sleep
 
 import global_vars as gv
 import chess
@@ -210,6 +211,8 @@ class Board(object):
         gv.prnt(('+' + '-'*int(w))*self.ncols+'+')
 
         gv.prnt(' '*int(float(self.ncols)*(w+1.)/2. - 8.) + "~~~~~~~~~~~~~~~~~")
+        if gv.AI_PLAYERS_ARE_PLAYING:
+            sleep(0.5)
 
 
 def setup_board():
@@ -364,6 +367,16 @@ def process_attack_turn():
             gv.N_DEFEND_ARMIES = gv.SAVED_GLOBALS['N_DEFEND_ARMIES']
             gv.DEFENDER = gv.SAVED_GLOBALS['DEFENDER']
             gv.CURR_PLAYER = gv.SAVED_GLOBALS['CURR_PLAYER']
+        gv.prnt.clear_output()
+        gv.prnt(
+            '\n===================================\n'
+            '{} is attacking {} at {} with {} armies from {}!\n'
+            'The defender has {} armies.\n'
+            '===================================\n\n'.format(
+                gv.CURR_PLAYER, gv.DEFENDER, gv.ATTACK_TO,
+                gv.N_ATTACK_ARMIES, gv.ATTACK_FROM, gv.N_DEFEND_ARMIES,
+            )
+        )
         narmies_attacker, narmies_defender = chess.play_chess(
                         gv.N_ATTACK_ARMIES,
                         gv.N_DEFEND_ARMIES,

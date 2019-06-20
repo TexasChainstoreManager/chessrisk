@@ -23,6 +23,7 @@ _RESPONSE = None
 
 PRINT_COUNT = 0
 PRINT_RECORD = ''
+AI_PLAYERS_ARE_PLAYING = False
 
 RESTORING = False
 
@@ -30,9 +31,6 @@ ANSWERS = {}
 
 CHECK = {'attacker': False, 'defender': False}
 
-# Will be populated with a dict of modules that contain the AI player classes
-AI_MODULES = {}
-CHOSEN_AI_MODULES = []
 
 # Not currently used, there are problems creating objects with the correct type
 # We have used a special-case PlayersDict class instead, since this is the only use
@@ -82,6 +80,7 @@ BOARD = None
 N_COMP_PLAYERS = 0
 N_HUMAN_PLAYERS = 0
 ROUND_NUMBER = 0
+# Player whose turn it is
 CURR_PLAYER = 0
 
 # Keep track of this here because we want it to be saved
