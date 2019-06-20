@@ -118,7 +118,14 @@ def chess_style(n_attack_armies, n_defend_armies, attacker, defender):
         save.checkpoint('during_battle')
 #        gv.UI.handle_user_input(fight_on_message.format(attacker, 'attacker'), clear=True, player=attacker)
 
+        ####
+        # Attacker's move
+        ###
         result = process_move('attacker', attacker, def_pieces)
+        # Recalc the pieces lists. There may have been promotions.
+        # This is a lazy programmer's way of ensuring accuracy.
+        def_pieces, att_pieces = get_pieces_from_board()
+
         if result == 'withdraw':
             withdraw = True
         elif result == 'checkmate':
@@ -126,8 +133,16 @@ def chess_style(n_attack_armies, n_defend_armies, attacker, defender):
             break
         if stalemate(att_pieces, def_pieces):
             break
+
+        ####
+        # Defender's move
+        ###
 #        gv.UI.handle_user_input(fight_on_message.format(defender, 'defender'), clear=True, player=defender)
         result = process_move('defender', defender, att_pieces)
+        # Recalc the pieces lists. There may have been promotions.
+        # This is a lazy programmer's way of ensuring accuracy.
+        def_pieces, att_pieces = get_pieces_from_board()
+
         if result == 'checkmate':
             att_pieces = []
             break
@@ -135,7 +150,8 @@ def chess_style(n_attack_armies, n_defend_armies, attacker, defender):
             break
         # Board layout: Entire board. Pieces captured by
         # attacker are placed at top, defender bottom.
-        # 'attacker' written at top, 'DEFENDER' at bottom    
+        # 'attacker' written at top, 'DEFENDER' at bottom
+
 
     n_attack_armies, n_defend_armies = \
         count_remaining_armies(att_pieces, def_pieces)
@@ -144,7 +160,7 @@ def chess_style(n_attack_armies, n_defend_armies, attacker, defender):
 
 
 def stalemate(att_pieces, def_pieces):
-    if att_pieces == ['g'] and def_pieces == ['G']:
+    if att_pieces == ['g'] and def_pieces == ['g']:
         gv.prnt('STALEMATE!')
         return True
     return False
@@ -416,7 +432,7 @@ def process_move(player_type, player, opponents_pieces):
         promote_pawn(player_type, file_to, rank_to, player)
 
     # We return False because by this point,
-    # withdraw has not been selcted.
+    # withdraw has not been selected.
     return False
 
 
@@ -788,9 +804,9 @@ def get_pieces_from_board():
         for ifile_ in xrange(NFILES):
             if gv.CHESSBOARD[ifile_][irank]:
                 if gv.CHESSBOARD[ifile_][irank].isupper():
-                    def_pieces.append(gv.CHESSBOARD[ifile_][irank])
+                    def_pieces.append(gv.CHESSBOARD[ifile_][irank].lower())
                 if gv.CHESSBOARD[ifile_][irank].islower():
-                    att_pieces.append(gv.CHESSBOARD[ifile_][irank])
+                    att_pieces.append(gv.CHESSBOARD[ifile_][irank].lower())
     return def_pieces, att_pieces
 
 

@@ -394,7 +394,7 @@ def process_attack_turn():
                                 gv.N_ATTACK_ARMIES - narmies_attacker
             gv.TERRITORIES[gv.ATTACK_TO].narmies = narmies_defender
 
-        raw_input('<press enter>')
+        gv.UI.handle_user_input('<press enter>')
         save.checkpoint('after_battle')
         gv.BOARD.print_board()
 
